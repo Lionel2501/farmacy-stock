@@ -32,76 +32,88 @@
             </thead>
             <tbody>
                 @foreach ($data as $medecine)
-                @php
-                    $reserva = $medecine->quantity - $medecine->quantity_min;
-                @endphp
-                <tr class="{{ 
-                    $reserva < 0 ? 'bg-danger-light' : 
-                    ($reserva <= 10 ? 'bg-warning-light' : 'bg-success-light') 
-                }}">
-                    <td>{{ $medecine->name }}</td>
-                    <td>{{ $medecine->vendor }}</td>
-                    <td>{{ $medecine->description }}</td>
-                    <td>{{ $medecine->quantity }}</td>
-                    <td>{{ $medecine->quantity_min }}</td>
-                    <td>{{ $reserva }}
-                    </td>
-                    <td>
-                        <!-- Bouton pour ouvrir le modal -->
-                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal-{{ $medecine->id }}">
-                            Editar
-                        </button>
-                    </td>
-                    <td>
-                        <input type="number" name="less" id="">-</input>
-                        <input type="number" name="add" id="">+</input>
-                    </td>
-                </tr>
-            
-                <!-- Modal -->
-                <div class="modal fade" id="editModal-{{ $medecine->id }}" tabindex="-1" aria-labelledby="editModalLabel-{{ $medecine->id }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <form method="POST" action="{{ route('updateMedecine', $medecine->id) }}">
+                    <tr class="{{ 
+                        $medecine->reserva < 0 ? 'bg-danger-light' : 
+                        ($medecine->reserva <= 10 ? 'bg-warning-light' : 'bg-success-light') 
+                    }}">
+                        <td>{{ $medecine->name }}</td>
+                        <td>{{ $medecine->vendor }}</td>
+                        <td>{{ $medecine->description }}</td>
+                        <td>{{ $medecine->quantity }}</td>
+                        <td>{{ $medecine->quantity_min }}</td>
+                        <td>{{ $medecine->reserva }}</td>
+                        <td>
+                            <!-- Bouton pour ouvrir le modal -->
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal-{{ $medecine->id }}">
+                                Editar
+                            </button>
+                        </td>
+                        <form action="{{ route('handleStock') }}" method="post">
                             @csrf
-                            @method('PUT')
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel-{{ $medecine->id }}">Modifier Médicament</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Nom</label>
-                                        <input type="text" name="name" class="form-control" value="{{ $medecine->name }}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Provedor</label>
-                                        <input type="text" name="vendor" class="form-control" value="{{ $medecine->vendor }}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Description</label>
-                                        <input type="text" name="description" class="form-control" value="{{ $medecine->description }}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Stock actuel</label>
-                                        <input type="number" name="quantity" class="form-control" value="{{ $medecine->quantity }}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Stock minimum</label>
-                                        <input type="number" name="quantity_min" class="form-control" value="{{ $medecine->quantity_min }}">
-                                    </div>
-                                    <!-- On n'affiche pas la réserve car elle est calculée -->
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                </div>
-                            </div>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="decrementStock({{ $medecine->id }})">−</button>
+                        
+                                <input type="hidden" name="id" value="{{ $medecine->id }}">
+                        
+                                <input type="number" name="stock_value" 
+                                    id="stock_value_{{ $medecine->id }}" 
+                                    value="{{ $medecine->quantity }}" 
+                                    class="form-control d-inline-block" 
+                                    style="width: 70px; text-align: center;">
+                        
+                                <button type="button" class="btn btn-sm btn-success" onclick="incrementStock({{ $medecine->id }})">+</button>
+                            </td>
+                            <td>
+                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                    Actualizar
+                                </button>
+                            </td>
                         </form>
+                    </tr>
+                
+                    <!-- Modal -->
+                    <div class="modal fade" id="editModal-{{ $medecine->id }}" tabindex="-1" aria-labelledby="editModalLabel-{{ $medecine->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form method="POST" action="{{ route('updateMedecine', $medecine->id) }}">
+                                @csrf
+                                @method('PUT')
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editModalLabel-{{ $medecine->id }}">Modificar Remedio</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nombre</label>
+                                            <input type="text" name="name" class="form-control" value="{{ $medecine->name }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Provedor</label>
+                                            <input type="text" name="vendor" class="form-control" value="{{ $medecine->vendor }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Descripción</label>
+                                            <input type="text" name="description" class="form-control" value="{{ $medecine->description }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Stock actual</label>
+                                            <input type="number" name="quantity" class="form-control" value="{{ $medecine->quantity }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Stock minimo</label>
+                                            <input type="number" name="quantity_min" class="form-control" value="{{ $medecine->quantity_min }}">
+                                        </div>
+                                        <!-- On n'affiche pas la réserve car elle est calculée -->
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Guardar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            @endforeach
-            
+                @endforeach
             </tbody>
         </table>
     </div>
@@ -121,3 +133,16 @@
         }
     </style>
 @endsection
+
+
+<script>
+    function incrementStock(id) {
+        const input = document.getElementById('stock_value_' + id);
+        input.value = parseInt(input.value) + 1;
+    }
+
+    function decrementStock(id) {
+        const input = document.getElementById('stock_value_' + id);
+        input.value = parseInt(input.value) - 1;
+    }
+</script>

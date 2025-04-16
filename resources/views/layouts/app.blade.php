@@ -15,7 +15,7 @@
     <!-- Toasts Bootstrap -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
         @if (session('success'))
-            <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
                         {{ session('success') }}
@@ -24,9 +24,9 @@
                 </div>
             </div>
         @endif
-
+    
         @if (session('error'))
-            <div class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="errorToast" class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
                         {{ session('error') }}
@@ -40,6 +40,24 @@
     <div class="container">
         @yield('content')  <!-- Contenu spécifique à chaque page -->
     </div>
+
+    <script>
+        setTimeout(() => {
+            const successToast = document.getElementById('successToast');
+            const errorToast = document.getElementById('errorToast');
+    
+            if (successToast) {
+                const toast = bootstrap.Toast.getOrCreateInstance(successToast);
+                toast.hide();
+            }
+    
+            if (errorToast) {
+                const toast = bootstrap.Toast.getOrCreateInstance(errorToast);
+                toast.hide();
+            }
+        }, 3000); // 3 secondes
+    </script>
+    
 
     <!-- Lien vers le JS de Bootstrap (avant </body>) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

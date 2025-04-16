@@ -9,19 +9,24 @@ class MedecineController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        try { 
+            $search = $request->input('search');
 
-        $data = Medecine::when($search, function ($query, $search) {
-            return $query->where('name', 'LIKE', "%{$search}%");
-        })->get();
-
-        foreach ($data as $medecine) {
-            $medecine->reserva = $medecine->quantity - $medecine->quantity_min;
+            $data = Medecine::when($search, function ($query, $search) {
+                return $query->where('name', 'ILIKE', "%{$search}%");
+            })->get();
+    
+            foreach ($data as $medecine) {
+                $medecine->reserva = $medecine->quantity - $medecine->quantity_min;
+            }
+    
+            $data = $data->sortBy('reserva')->values();
+    
+            return view('medecine.index', compact('data', 'search'));
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', $th->getMessage());
         }
-
-        $data = $data->sortBy('reserva')->values();
-
-        return view('medecine.index', compact('data', 'search'));
+       
     }
 
     public function updateMedecine(Request $request, $id)
@@ -36,11 +41,30 @@ class MedecineController extends Controller
             ]);
     
             if ($updated) {
-                return redirect()->back()->with('success', 'Médicament mis à jour avec succès.');
+                return redirect()->back()->with('success', 'Medicamento actualizado con éxito.');
             } else {
-                return redirect()->back()->with('error', 'Aucun médicament trouvé avec cet ID.');
+                return redirect()->back()->with('error', 'No se encontró ningún medicamento con ese ID.');
             }
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
+
+    public function handleStock(Request $request)
+    {
+        try {
+            $id = $request->id;
+            $stock_value = $request->stock_value;
+
+            $updated = Medecine::where('id', $id)->update([
+                'quantity'      => $stock_value
+            ]);
     
+            if ($updated) {
+                return redirect()->back()->with('success', 'Medicamento actualizado con éxito.');
+            } else {
+                return redirect()->back()->with('error', 'No se encontró ningún medicamento con ese ID.');
+            }
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', $th->getMessage());
         }
