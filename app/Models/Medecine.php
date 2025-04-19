@@ -20,6 +20,7 @@ class Medecine extends Authenticatable
     protected $fillable = [
         'name',
         'description',
+        'vendor',
         'quantity',
         'quantity_min'
     ];

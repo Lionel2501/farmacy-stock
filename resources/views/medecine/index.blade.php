@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Liste des Médicaments')
+@section('title', 'Stock Management')
 
 @section('content')
     <div class="container mt-5">
@@ -15,6 +15,10 @@
             <!-- Bouton pour lancer la recherche -->
             <button type="submit" class="btn btn-sm btn-success">Buscar</button>
         </form>
+
+        <div class="w-100 d-flex justify-content-end mb-2">
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createModal">Agregar item</button>
+        </div>             
         
         <!-- Table pour afficher les médicaments -->
         <table class="table table-bordered">
@@ -26,8 +30,10 @@
                     <th>Stock Actual</th>
                     <th>Stock Minimo</th>
                     <th>Stock Parcial</th>
-                    <th>Editar</th>
                     <th>Acción</th>
+                    <th>Actualizar</th>
+                    <th>Editar</th>
+                    <th>Borrar</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,12 +48,6 @@
                         <td>{{ $medecine->quantity }}</td>
                         <td>{{ $medecine->quantity_min }}</td>
                         <td>{{ $medecine->reserva }}</td>
-                        <td>
-                            <!-- Bouton pour ouvrir le modal -->
-                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal-{{ $medecine->id }}">
-                                Editar
-                            </button>
-                        </td>
                         <form action="{{ route('handleStock') }}" method="post">
                             @csrf
                             <td>
@@ -69,6 +69,17 @@
                                 </button>
                             </td>
                         </form>
+                        <td>
+                            <!-- Bouton pour ouvrir le modal -->
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal-{{ $medecine->id }}">
+                                Editar
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#borrarModal-{{ $medecine->id }}">
+                                Borrar
+                            </button>
+                        </td>
                     </tr>
                 
                     <!-- Modal -->
@@ -113,9 +124,74 @@
                             </form>
                         </div>
                     </div>
+
+                    <div class="modal fade" id="borrarModal-{{ $medecine->id }}" tabindex="-1" aria-labelledby="borrarModalLabel-{{ $medecine->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form method="POST" action="{{ route('deleteItem', $medecine->id) }}">
+                                @csrf
+                                @method('DELETE')
+            
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="borrarModalLabel-{{ $medecine->id }}">Confirmar eliminación</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ¿Estás seguro de que deseas eliminar el remedio <strong>{{ $medecine->name }}</strong>?
+                                        Esta acción no se puede deshacer.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 @endforeach
             </tbody>
         </table>
+
+        <!-- Modal -->
+        <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="POST" action="{{ route('storeItem') }}">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createModalLabel">Agregar Remedio</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Proveedor</label>
+                                <input type="text" name="vendor" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Descripción</label>
+                                <input type="text" name="description" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Stock actual</label>
+                                <input type="number" name="quantity" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Stock mínimo</label>
+                                <input type="number" name="quantity_min" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
 
